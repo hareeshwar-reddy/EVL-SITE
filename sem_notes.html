@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Select Semester | EVL</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;800&display=swap" rel="stylesheet">
+<style>
+:root {
+    --bg-black: #05070a;
+    --card-glass: rgba(15, 23, 42, 0.7);
+    --border-glass: rgba(255, 255, 255, 0.1);
+    --accent: #ec4899;
+    --text-muted: #94a3b8;
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', sans-serif; }
+body { 
+    background-color: var(--bg-black); color: #fff; min-height: 100vh; opacity: 0; 
+    transition: opacity 0.8s ease; overflow-x: hidden;
+    background: linear-gradient(rgba(5,7,10,0.94), rgba(5,7,10,0.94)), url("vlsichip.png") center/cover fixed;
+}
+body.loaded { opacity: 1; }
+
+#trail-canvas { position: fixed; inset: 0; pointer-events: none; z-index: 5; }
+.loader { position: fixed; inset: 0; background: var(--bg-black); z-index: 1000; transition: clip-path 0.8s cubic-bezier(0.77, 0, 0.175, 1); }
+.loader.hide { clip-path: circle(0% at 50% 50%); }
+
+.top { display: flex; align-items: center; justify-content: space-between; padding: 50px 60px; max-width: 1400px; margin: 0 auto; position: relative; z-index: 20; }
+.back { 
+    text-decoration: none; color: #fff; font-size: 13px; font-weight: 700; text-transform: uppercase; 
+    padding: 12px 24px; border-radius: 12px; background: rgba(236, 72, 153, 0.15); border: 1px solid var(--accent); transition: 0.3s; 
+}
+.back:hover { background: var(--accent); transform: translateX(-5px); }
+
+.grid { 
+    display: grid; 
+    grid-template-columns: repeat(4, 1fr); 
+    gap: 20px; 
+    padding: 0 60px 80px; 
+    max-width: 1400px; 
+    margin: 0 auto; 
+    position: relative; 
+    z-index: 20; 
+}
+
+.tile {
+    background: var(--card-glass); backdrop-filter: blur(25px); padding: 40px 20px; border-radius: 20px;
+    text-decoration: none; color: #fff; border: 1px solid var(--border-glass); text-align: center; transition: all 0.4s ease;
+}
+.tile:hover {
+    transform: translateY(-8px);
+    background: rgba(236, 72, 153, 0.08); 
+    border-color: var(--accent);
+    box-shadow: 0 15px 30px rgba(0,0,0,0.4);
+}
+.tile h2 { font-size: 22px; margin-bottom: 8px; transition: 0.3s; }
+.tile:hover h2 { color: var(--accent); }
+.tile p { font-size: 13px; color: var(--text-muted); }
+
+body.fade-out { filter: blur(15px); opacity: 0; transition: 0.5s; }
+
+@media (max-width: 1100px) { .grid { grid-template-columns: repeat(2, 1fr); } }
+@media (max-width: 600px) { .grid { grid-template-columns: 1fr; } }
+</style>
+</head>
+<body>
+<canvas id="trail-canvas"></canvas>
+<div class="loader"></div>
+
+<div class="top">
+    <a href="explore.html" class="back">← Back</a>
+    <h1>Select Semester</h1>
+    <div style="width: 80px;"></div>
+</div>
+
+<div class="grid">
+    <a class="tile" href="https://youtube.com"><h2>Semester 1</h2><p>1st Year </p></a>
+    <a class="tile" href="notes.html"><h2>Semester 2</h2><p>1st Year </p></a>
+    <a class="tile" href="notes_sem_2.html"><h2>Semester 3</h2><p>2nd Year </p></a>
+    <a class="tile" href="notes.html"><h2>Semester 4</h2><p>2nd Year </p></a>
+    <a class="tile" href="notes.html"><h2>Semester 5</h2><p>3rd Year </p></a>
+    <a class="tile" href="notes.html"><h2>Semester 6</h2><p>3rd Year </p></a>
+    <a class="tile" href="notes.html"><h2>Semester 7</h2><p>4th Year </p></a>
+    <a class="tile" href="notes.html"><h2>Semester 8</h2><p>4th Year </p></a>
+</div>
+
+<script>
+    window.addEventListener("DOMContentLoaded", () => {
+        document.body.classList.add("loaded");
+        setTimeout(() => document.querySelector(".loader").classList.add("hide"), 600);
+    });
+
+    document.querySelectorAll("a").forEach(link => {
+        link.addEventListener("click", e => {
+            if (link.getAttribute('href') === "#") return;
+            e.preventDefault();
+            document.body.classList.add("fade-out");
+            setTimeout(() => window.location.href = link.href, 500);
+        });
+    });
+
+    const canvas = document.getElementById('trail-canvas');
+    const ctx = canvas.getContext('2d');
+    let points = [];
+    const maxAge = 35;
+    function resize() { canvas.width = window.innerWidth; canvas.height = window.innerHeight; }
+    window.addEventListener('resize', resize); resize();
+    window.addEventListener('mousemove', e => points.push({ x: e.clientX, y: e.clientY, age: 0 }));
+    function animate() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        if (points.length > 1) {
+            for (let i = 1; i < points.length; i++) {
+                const opacity = (1 - points[i].age / maxAge) * 0.15;
+                ctx.beginPath(); ctx.strokeStyle = `rgba(236, 72, 153, ${opacity})`;
+                ctx.lineWidth = 15; ctx.lineCap = 'round';
+                ctx.moveTo(points[i-1].x, points[i-1].y); ctx.lineTo(points[i].x, points[i].y);
+                ctx.stroke();
+            }
+        }
+        points.forEach(p => p.age++);
+        points = points.filter(p => p.age < maxAge);
+        requestAnimationFrame(animate);
+    }
+    animate();
+</script>
+</body>
+</html>

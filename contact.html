@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Contact Us | EVL</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', sans-serif; }
+
+body { background: #000; color: #fff; min-height: 100vh; overflow: hidden; opacity: 0; transition: opacity 0.8s ease; }
+body.loaded { opacity: 1; }
+
+#bg-video { position: fixed; inset: 0; width: 100vw; height: 100vh; object-fit: cover; z-index: -2; }
+#trail-canvas { position: fixed; inset: 0; pointer-events: none; z-index: 5; }
+
+.loader { position: fixed; inset: 0; background: #000; z-index: 1000; transition: clip-path 0.8s cubic-bezier(0.77, 0, 0.175, 1); }
+.loader.hide { clip-path: circle(0% at 50% 50%); }
+
+/* UPDATED DARK BACK BUTTON */
+.top { position: absolute; top: 24px; left: 24px; z-index: 30; }
+.back { 
+    text-decoration: none; 
+    color: #fff; 
+    font-size: 12px; 
+    font-weight: 600; 
+    text-transform: uppercase; 
+    padding: 10px 22px; 
+    border-radius: 12px; 
+    /* Darker glass style */
+    background: rgba(0, 0, 0, 0.6); 
+    border: 1px solid rgba(255, 255, 255, 0.1); 
+    backdrop-filter: blur(15px); 
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+    transition: all 0.3s cubic-bezier(0.23, 1, 0.32, 1); 
+    display: inline-block;
+}
+
+.back:hover { 
+    background: rgba(0, 0, 0, 0.85); 
+    border-color: var(--accent, #ec4899);
+    transform: translateX(-3px);
+    box-shadow: 0 0 20px rgba(236, 72, 153, 0.2);
+}
+
+.container { position: absolute; top: 90px; right: 48px; z-index: 20; }
+
+.contact-card {
+    background: rgba(255, 255, 255, 0.01);
+    backdrop-filter: blur(40px) saturate(150%);
+    -webkit-backdrop-filter: blur(40px) saturate(150%);
+    padding: 28px 32px; border-radius: 22px; border: 1px solid rgba(255, 255, 255, 0.08);
+    max-width: 420px;
+    transform-origin: top center;
+    animation: waveBreeze 8s ease-in-out infinite;
+}
+
+.contact-card h1 { font-size: 26px; font-weight: 700; margin-bottom: 8px; letter-spacing: -0.5px; }
+.contact-card p { font-size: 14px; color: #cbd5e1; margin-bottom: 24px; line-height: 1.6; }
+
+.email-box {
+    background: rgba(255, 255, 255, 0.95);
+    padding: 18px 20px;
+    border-radius: 16px;
+    border: 1px solid #fff;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+}
+
+.label {
+    font-size: 10px; text-transform: uppercase; letter-spacing: 2px;
+    color: #475569;
+    margin-bottom: 4px; display: block; font-weight: 700;
+}
+
+.email-box a {
+    color: #000 !important;
+    font-size: 16px; font-weight: 700; text-decoration: none;
+}
+
+@keyframes waveBreeze {
+    0% { transform: rotate(0deg) skewX(0deg); }
+    25% { transform: rotate(1.5deg) skewX(0.5deg); }
+    50% { transform: rotate(-1deg) skewX(-1deg); }
+    75% { transform: rotate(2deg) skewX(0.7deg); }
+    100% { transform: rotate(0deg) skewX(0deg); }
+}
+
+body.fade-out { filter: blur(25px); opacity: 0; transition: 0.6s; }
+</style>
+</head>
+
+<body>
+<video autoplay muted loop playsinline id="bg-video">
+    <source src="dragon.webm" type="video/webm">
+</video>
+
+<canvas id="trail-canvas"></canvas>
+<div class="loader"></div>
+
+<div class="top"><a href="main.html" class="back">← Back</a></div>
+
+<div class="container">
+    <div class="contact-card">
+        <h1>Get in Touch</h1>
+        <p>For resources, suggestions, or portal-related queries.</p>
+
+        <div class="email-box">
+            <span class="label">Primary Mail</span>
+            <a href="mailto:hareeshwar.reddy13@gmail.com">
+                hareeshwar.reddy13@gmail.com
+            </a>
+        </div>
+    </div>
+</div>
+
+<script>
+window.addEventListener("DOMContentLoaded", () => {
+    document.body.classList.add("loaded");
+    setTimeout(() => document.querySelector(".loader").classList.add("hide"), 600);
+});
+
+document.querySelectorAll("a").forEach(link => {
+    link.addEventListener("click", e => {
+        if (link.getAttribute("href").startsWith("mailto:")) return;
+        e.preventDefault();
+        document.body.classList.add("fade-out");
+        setTimeout(() => window.location.href = link.href, 600);
+    });
+});
+
+const canvas = document.getElementById("trail-canvas");
+const ctx = canvas.getContext("2d");
+let points = [];
+const maxAge = 35;
+
+function resize() {
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+}
+window.addEventListener("resize", resize);
+resize();
+
+window.addEventListener("mousemove", e => {
+    points.push({ x: e.clientX, y: e.clientY, age: 0 });
+});
+
+function animate() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    for (let i = 1; i < points.length; i++) {
+        const opacity = (1 - points[i].age / maxAge) * 0.12;
+        ctx.beginPath();
+        ctx.strokeStyle = `rgba(236, 72, 153, ${opacity})`;
+        ctx.lineWidth = 14;
+        ctx.lineCap = "round";
+        ctx.moveTo(points[i - 1].x, points[i - 1].y);
+        ctx.lineTo(points[i].x, points[i].y);
+        ctx.stroke();
+    }
+    points.forEach(p => p.age++);
+    points = points.filter(p => p.age < maxAge);
+    requestAnimationFrame(animate);
+}
+animate();
+</script>
+</body>
+</html>

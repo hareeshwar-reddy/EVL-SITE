@@ -1,0 +1,352 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>EVL Community | Home</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;800&display=swap" rel="stylesheet">
+<style>
+:root {
+    --accent: #ec4899;
+    --accent-glow: rgba(236, 72, 153, 0.3);
+    --text-muted: #64748b;
+    --expo-out: cubic-bezier(0.16, 1, 0.3, 1);
+    --current-bg: #000000;
+    --menu-glass: rgba(10, 15, 25, 0.7);
+    --menu-border: rgba(255, 255, 255, 0.05);
+    --subject-color: #ffffff; 
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', sans-serif; }
+html, body { 
+    background-color: var(--current-bg); 
+    color: #fff; 
+    height: 100%; 
+    overflow: hidden; 
+    transition: background-color 0.8s var(--expo-out); 
+}
+
+body { opacity: 0; transition: opacity 1s var(--expo-out), background-color 0.8s var(--expo-out); }
+body.loaded { opacity: 1; }
+
+#trail-canvas { position: fixed; inset: 0; pointer-events: none; z-index: 5; }
+
+.loader {
+    position: fixed; inset: 0; background: #000; z-index: 1000;
+    display: flex; align-items: center; justify-content: center;
+    transition: transform 0.8s var(--expo-out), opacity 0.6s ease;
+}
+.loader.hide { transform: translateY(-100%); opacity: 0; pointer-events: none; }
+
+.wrapper { display: grid; grid-template-columns: 300px 1fr; height: 100vh; padding: 16px; gap: 16px; }
+
+/* SIDEBAR */
+.sidebar { 
+    background: var(--menu-glass); 
+    backdrop-filter: blur(40px); 
+    border: 1px solid var(--menu-border); 
+    border-radius: 28px; 
+    padding: 40px 0 24px 0; 
+    display: flex; 
+    flex-direction: column; 
+    z-index: 20;
+    overflow: hidden; 
+    transition: all 0.8s var(--expo-out);
+}
+
+.menu-header { font-size: 11px; font-weight: 800; letter-spacing: 4px; color: var(--text-muted); margin-bottom: 20px; padding-left: 32px; }
+
+.nav-links {
+    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
+}
+
+/* BASE LINK STYLE */
+.sidebar a:not(.contact-btn) { 
+    position: relative;
+    display: flex; 
+    align-items: center; 
+    color: var(--text-muted); 
+    text-decoration: none; 
+    font-size: 15px; 
+    font-weight: 500; 
+    padding: 18px 32px; 
+    margin: 4px 16px;
+    border-radius: 14px;
+    transition: all 0.3s var(--expo-out); 
+    z-index: 1;
+    overflow: hidden; /* Clips the rotating lamp */
+}
+
+/* THE HORSE RACE LAMP (The spinning light) */
+.sidebar a:not(.contact-btn)::before {
+    content: '';
+    position: absolute;
+    width: 200%;
+    height: 500%; /* Extra height to ensure it covers the link during rotation */
+    top: -200%;
+    left: -50%;
+    background: conic-gradient(
+        from 0deg,
+        transparent 0deg,
+        transparent 280deg,
+        var(--accent) 340deg,
+        transparent 360deg
+    );
+    opacity: 0;
+    z-index: -2;
+    transition: opacity 0.3s ease;
+}
+
+/* THE INNER COVER (Creates the border effect) */
+.sidebar a:not(.contact-btn)::after {
+    content: '';
+    position: absolute;
+    inset: 2px; /* Border thickness */
+    background: #111; /* Dark background to match sidebar depth */
+    border-radius: 12px;
+    z-index: -1;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+/* HOVER STATES */
+.sidebar a:not(.contact-btn):hover {
+    color: #fff;
+    padding-left: 42px;
+}
+
+.sidebar a:not(.contact-btn):hover::before {
+    opacity: 1;
+    animation: horseRace 1.5s linear infinite;
+}
+
+.sidebar a:not(.contact-btn):hover::after {
+    opacity: 1;
+    background: rgba(20, 20, 20, 0.95); /* Slight highlight to the inner button */
+}
+
+@keyframes horseRace {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+}
+
+/* PREMIUM CONTACT BUTTON */
+.contact-btn { 
+    margin: 0 24px; 
+    background: linear-gradient(135deg, rgba(236, 72, 153, 0.15), rgba(236, 72, 153, 0.05)) !important; 
+    border: none !important; 
+    color: #fff !important; 
+    justify-content: center;
+    border-radius: 16px;
+    padding: 16px !important;
+    font-weight: 700;
+    font-size: 12px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    position: relative;
+    overflow: hidden;
+    transition: all 0.4s var(--expo-out) !important;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+}
+
+/* MAIN CONTENT */
+.main { 
+    position: relative; border-radius: 32px; border: 1px solid var(--menu-border); 
+    display: flex; align-items: center; padding: 0 100px; overflow: hidden; 
+    background: transparent; transition: border 0.8s var(--expo-out);
+}
+
+.bg-layer { 
+    position: absolute; inset: -15%; background-size: cover; background-position: center; 
+    transition: opacity 0.8s var(--expo-out), transform 1.2s var(--expo-out); 
+    z-index: 0; transform: scale(1.2); filter: brightness(0.525) saturate(1.1);
+}
+.bg-layer.active { transform: scale(0.8); }
+
+.dimmer { 
+    position: absolute; inset: 0; 
+    background: radial-gradient(circle at center, transparent 0%, rgba(0,0,0,0.35) 100%);
+    z-index: 1; 
+}
+
+#subject-overlay { 
+    position: absolute; left: 100px; bottom: 80px; z-index: 5; 
+    font-size: 4.5vw; font-weight: 800; text-transform: uppercase; 
+    opacity: 0; transform: translateY(40px); 
+    transition: all 0.5s var(--expo-out), color 0.8s var(--expo-out); 
+    color: var(--subject-color); pointer-events: none; 
+}
+
+.text { max-width: 650px; z-index: 10; transition: all 0.5s var(--expo-out); }
+.text h1 { font-size: 72px; font-weight: 800; line-height: 0.95; margin-bottom: 28px; letter-spacing: -4px; overflow: hidden; }
+.text h1 span { display: block; transform: translateY(110%); transition: transform 0.6s var(--expo-out); }
+body.loaded .text h1 span { transform: translateY(0); }
+
+.text p { font-size: 20px; color: var(--text-muted); line-height: 1.6; margin-bottom: 45px; opacity: 0; transform: translateY(20px); transition: all 0.6s var(--expo-out) 0.15s; }
+body.loaded .text p { opacity: 1; transform: translateY(0); }
+
+.text button { 
+    padding: 20px 54px; border: none; background: var(--accent); color: #fff; 
+    font-size: 16px; font-weight: 600; border-radius: 18px; cursor: pointer; 
+    transition: all 0.25s var(--expo-out); opacity: 0; transform: translateY(20px);
+}
+body.loaded .text button { opacity: 1; transform: translateY(0); transition-delay: 0.3s; }
+
+.main.swapping .text { opacity: 0; transform: translateY(-30px); filter: blur(15px); }
+.main.swapping #subject-overlay { opacity: 1; transform: translateY(0); }
+</style>
+</head>
+<body>
+
+<canvas id="trail-canvas"></canvas>
+<div class="loader"><h2>Initializing...</h2></div>
+
+<div class="wrapper">
+    <nav class="sidebar" id="dynamic-sidebar">
+        <div class="menu-header">NAVIGATE</div>
+        
+        <div class="nav-links">
+            <a href="sem_notes.html" data-bg="notes.png" data-name="Notes" data-color="#240d0d">Notes</a>
+            <a href="#" data-bg="syllabus.png" data-name="Syllabus" data-color="#0d241d">Syllabus</a>
+            <a href="#" data-bg="midpapers.png" data-name="Mid Papers" data-color="#160d24">Mid Papers</a>
+            <a href="#" data-bg="sempapers.png" data-name="Sem Papers" data-color="#0a1224">Sem Papers</a>
+            <a href="#" data-bg="textbooks.png" data-name="Textbooks" data-color="#111111">Textbooks</a>
+            <a href="#" data-bg="projects.png" data-name="Projects" data-color="#121a24">Projects</a>
+        </div>
+
+        <a href="contact.html" class="contact-btn">Contact Us</a>
+    </nav>
+
+    <main class="main" id="main-content">
+        <div id="bg1" class="bg-layer active" style="background-image: url('vlsi.png'); opacity: 1;"></div>
+        <div id="bg2" class="bg-layer" style="opacity: 0;"></div>
+        <div class="dimmer"></div>
+        <h2 id="subject-overlay">SUBJECT</h2>
+        <div class="text">
+            <h1><span>Welcome to</span> <span style="color: var(--accent)">EVL Community</span></h1>
+            <p>A sophisticated hub for curated study materials and engineering project resources.</p>
+            <a href="explore.html" style="text-decoration: none;"><button>Begin Exploration</button></a>
+        </div>
+    </main>
+</div>
+
+<script>
+    const scrollSound = new Audio('scroll.mp3');
+    scrollSound.volume = 0.4;
+
+    function playScroll() {
+        scrollSound.currentTime = 0;
+        scrollSound.play().catch(() => {});
+    }
+
+    function lightenColor(hex, percent) {
+        const num = parseInt(hex.replace('#',''), 16),
+        amt = Math.round(2.55 * percent),
+        R = (num >> 16) + amt,
+        G = (num >> 8 & 0x00FF) + amt,
+        B = (num & 0x0000FF) + amt;
+        return "#" + (0x1000000 + (R<255?R<1?0:R:255)*0x10000 + (G<255?G<1?0:G:255)*0x100 + (B<255?B<1?0:B:255)).toString(16).slice(1);
+    }
+
+    window.addEventListener("DOMContentLoaded", () => {
+        setTimeout(() => {
+            document.body.classList.add("loaded");
+            document.querySelector(".loader").classList.add("hide");
+        }, 600);
+    });
+
+    const sidebar = document.getElementById('dynamic-sidebar');
+    const mainContent = document.getElementById('main-content');
+    const bg1 = document.getElementById('bg1');
+    const bg2 = document.getElementById('bg2');
+    const overlayText = document.getElementById('subject-overlay');
+    const menuLinks = document.querySelectorAll('.sidebar a:not(.contact-btn)');
+
+    let currentLayer = bg1;
+    let nextLayer = bg2;
+    let lastImg = "vlsi.png";
+
+    function swapBackground(imgPath, subjectName, targetColor, isNav = false) {
+        if (lastImg === imgPath) return;
+        if (!isNav) playScroll();
+
+        document.body.style.setProperty('--current-bg', targetColor);
+        document.body.style.setProperty('--subject-color', lightenColor(targetColor, 60));
+        
+        const glassColor = targetColor.replace('#', '');
+        const r = parseInt(glassColor.substring(0,2), 16), g = parseInt(glassColor.substring(2,4), 16), b = parseInt(glassColor.substring(4,6), 16);
+        document.body.style.setProperty('--menu-glass', `rgba(${r}, ${g}, ${b}, 0.6)`);
+
+        overlayText.innerText = subjectName;
+        nextLayer.style.backgroundImage = `url("${imgPath}")`;
+        nextLayer.classList.add('active');
+        currentLayer.classList.remove('active');
+        nextLayer.style.opacity = "1";
+        currentLayer.style.opacity = "0";
+        
+        let temp = currentLayer;
+        currentLayer = nextLayer;
+        nextLayer = temp;
+        lastImg = imgPath;
+
+        if (subjectName !== 'SUBJECT') {
+            mainContent.classList.add('swapping');
+        } else {
+            mainContent.classList.remove('swapping');
+        }
+    }
+
+    sidebar.addEventListener('mouseenter', () => {
+        swapBackground('navigate.png', 'NAVIGATE', '#111111', true);
+    });
+
+    menuLinks.forEach(link => {
+        link.addEventListener('mouseenter', (e) => {
+            e.stopPropagation(); 
+            const imgPath = link.getAttribute('data-bg');
+            const subjectName = link.getAttribute('data-name');
+            const targetColor = link.getAttribute('data-color');
+            swapBackground(imgPath, subjectName, targetColor);
+        });
+    });
+
+    sidebar.addEventListener('mouseover', (e) => {
+        if (e.target === sidebar) {
+            swapBackground('navigate.png', 'NAVIGATE', '#111111', true);
+        }
+    });
+
+    sidebar.addEventListener('mouseleave', () => {
+        document.body.style.setProperty('--current-bg', '#000000');
+        swapBackground('vlsi.png', 'SUBJECT', '#000000', true);
+    });
+
+    // Trail Animation
+    const canvas = document.getElementById('trail-canvas');
+    const ctx = canvas.getContext('2d');
+    let points = [];
+    const maxAge = 25;
+    function resize() { canvas.width = window.innerWidth; canvas.height = window.innerHeight; }
+    window.addEventListener('resize', resize); resize();
+    window.addEventListener('mousemove', e => points.push({ x: e.clientX, y: e.clientY, age: 0 }));
+
+    function animate() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        if (points.length > 1) {
+            for (let i = 1; i < points.length; i++) {
+                const ageFactor = (1 - points[i].age / maxAge);
+                ctx.strokeStyle = `rgba(236, 72, 153, ${ageFactor * 0.15})`;
+                ctx.lineWidth = ageFactor * 12; 
+                ctx.beginPath(); ctx.moveTo(points[i-1].x, points[i-1].y); ctx.lineTo(points[i].x, points[i].y); ctx.stroke();
+            }
+        }
+        points.forEach(p => p.age++);
+        points = points.filter(p => p.age < maxAge);
+        requestAnimationFrame(animate);
+    }
+    animate();
+</script>
+</body>
+</html>
